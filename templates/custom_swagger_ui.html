@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic YAML Links</title>
+    <style>
+        body {
+            background-color: #212630;
+            color: #FFFFFF;
+            font-family: Arial, sans-serif; /* Ensuring a clean and modern font */
+        }
+        a {
+            color: #00e6ff; /* Changes link color to cyan */
+            text-decoration: none; /* Removes underline from links */
+        }
+        a:hover {
+            color: #0292B1; /* Changes link color on hover to a darker cyan */
+            text-decoration: underline; /* Adds underline on hover for better UX */
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.0.0/dist/js-yaml.min.js"></script>
+</head>
+<body>
+    <div id="custom-links">
+        <h3>Download Individual YAML Files</h3>
+        <ul id="links-list"></ul>
+    </div>
+
+    <script>
+    window.onload = function() {
+        fetch('/schema/')  // Updated schema URL path
+            .then(response => response.text())
+            .then(text => {
+                const data = jsyaml.load(text);
+                const paths = data.paths;
+                const list = document.getElementById('links-list');
+                const prefixes = {};
+
+                // Adjusted to correctly parse the path based on your new structure
+                for (let path in paths) {
+                    const prefix = path.split('/')[1]; // Adjusting to get the prefix directly after '/'
+                    if (!prefixes[prefix]) {
+                        prefixes[prefix] = [];
+                    }
+                    prefixes[prefix].push(path);
+                }
+
+                // Create download links for each API group
+                for (let prefix in prefixes) {
+                    const filename = `${prefix}.yaml`;
+                    const listItem = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = `/yaml/${prefix}`;  // Updated link to YAML download endpoint
+                    link.textContent = `Download ${filename}`;
+                    listItem.appendChild(link);
+                    list.appendChild(listItem);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching schema:', error);
+            });
+    };
+    </script>
+
+
+
+</body>
+</html>
